@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Ollama service for AI generation
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-service
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama-data:/root/.ollama
+    command: serve
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+
+  # Flask API service
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: script-generator-api
+    ports:
+      - "5000:5000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - MODEL_NAME=mistral
+      - FLASK_ENV=development
+    depends_on:
+      ollama:
+        condition: service_healthy
+    volumes:
+      - ./app.py:/app/app.py
+    command: python app.py
+
+volumes:
+  ollama-data:
+
+networks:
+  default:
+    name: script-generator-network

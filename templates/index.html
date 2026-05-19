@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Script Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-panel,
+        .results-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            grid-column: span 2;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .status.loading {
+            display: block;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status.success {
+            display: block;
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status.error {
+            display: block;
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .results-panel {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .result-section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .result-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .result-label {
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #667eea;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .result-content {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            line-height: 1.6;
+            font-size: 0.95em;
+            color: #444;
+            border-left: 4px solid #667eea;
+        }
+
+        .copy-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-top: 8px;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .placeholder {
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge-loading {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .header-info {
+            margin-top: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .model-indicator {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Video Script Generator</h1>
+            <p class="subtitle">Generate engaging promotional video scripts powered by AI</p>
+            <div class="header-info">
+                Instant hooks, scripts, scenes & CTAs for your products
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <!-- Form Panel -->
+            <div class="form-panel">
+                <h2 style="margin-bottom: 25px; color: #333; font-size: 1.3em;">Product Details</h2>
+
+                <div class="status" id="status"></div>
+
+                <div class="form-group">
+                    <label for="productName">Product Name *</label>
+                    <input type="text" id="productName" placeholder="e.g., SmartWater Bottle">
+                </div>
+
+                <div class="form-group">
+                    <label for="productDescription">Product Description *</label>
+                    <textarea id="productDescription" placeholder="What does it do? What makes it special?"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="targetAudience">Target Audience *</label>
+                    <input type="text" id="targetAudience" placeholder="e.g., Fitness enthusiasts, busy professionals">
+                </div>
+
+                <div class="form-group">
+                    <label for="campaignGoal">Campaign Goal *</label>
+                    <select id="campaignGoal">
+                        <option value="">Select a goal...</option>
+                        <option value="Increase brand awareness">Increase Brand Awareness</option>
+                        <option value="Drive sales">Drive Sales</option>
+                        <option value="Launch new product">Launch New Product</option>
+                        <option value="Educate customers">Educate Customers</option>
+                        <option value="Build community engagement">Build Community Engagement</option>
+                        <option value="Demo product features">Demo Product Features</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Video Duration</label>
+                    <div class="input-row">
+                        <input type="text" id="duration" value="30" placeholder="Seconds">
+                        <select id="platform">
+                            <option value="15">15 seconds (ads)</option>
+                            <option value="30" selected>30 seconds (standard)</option>
+                            <option value="60">60 seconds (long-form)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="clearForm()">Clear</button>
+                    <button class="btn-primary" onclick="generateAll()">
+                        <span id="btnText">Generate All</span>
+                    </button>
+                </div>
+
+                <div
+                    style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 0.85em; color: #666;">
+                    <p><strong>Quick Actions:</strong></p>
+                    <button class="btn-secondary" onclick="generateHook()"
+                        style="width: 100%; margin-top: 8px; margin-bottom: 8px;">Hook Only</button>
+                    <button class="btn-secondary" onclick="generateScript()"
+                        style="width: 100%; margin-bottom: 8px;">Script Only</button>
+                    <button class="btn-secondary" onclick="generateScenes()"
+                        style="width: 100%; margin-bottom: 8px;">Scenes Only</button>
+                    <button class="btn-secondary" onclick="generateCTA()" style="width: 100%;">CTA Only</button>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="results-panel">
+                <h2 style="margin-bottom: 25px; color: #333; font-size: 1.3em;">Generated Content</h2>
+
+                <div id="resultsContainer" class="placeholder">
+                    Generate content to see results here
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        function getFormData() {
+            return {
+                productName: document.getElementById('productName').value,
+                productDescription: document.getElementById('productDescription').value,
+                targetAudience: document.getElementById('targetAudience').value,
+                campaignGoal: document.getElementById('campaignGoal').value,
+                duration: parseInt(document.getElementById('duration').value) || 30
+            };
+        }
+
+        function validateForm() {
+            const data = getFormData();
+            if (!data.productName || !data.productDescription || !data.targetAudience || !data.campaignGoal) {
+                showStatus('Please fill in all required fields', 'error');
+                return false;
+            }
+            return data;
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = type === 'loading' ? `${message}` : message;
+            status.className = `status ${type}`;
+            if (type === 'loading') {
+                status.innerHTML = `<span class="spinner"></span>${message}`;
+            }
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            let html = '';
+
+            if (results.hook) {
+                html += `
+                    <div class="result-section">
+                        <div class="result-label">🎯 Hook</div>
+                        <div class="result-content">${escapeHtml(results.hook)}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(results.hook)}')">Copy</button>
+                    </div>
+                `;
+            }
+
+            if (results.script) {
+                html += `
+                    <div class="result-section">
+                        <div class="result-label">📝 Script</div>
+                        <div class="result-content">${escapeHtml(results.script).replace(/\n/g, '<br>')}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(results.script)}')">Copy</button>
+                    </div>
+                `;
+            }
+
+            if (results.scenes) {
+                html += `
+                    <div class="result-section">
+                        <div class="result-label">🎬 Scene Suggestions</div>
+                        <div class="result-content">${escapeHtml(results.scenes).replace(/\n/g, '<br>')}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(results.scenes)}')">Copy</button>
+                    </div>
+                `;
+            }
+
+            if (results.cta) {
+                html += `
+                    <div class="result-section">
+                        <div class="result-label">✨ Call-to-Action</div>
+                        <div class="result-content">${escapeHtml(results.cta)}</div>
+                        <button class="copy-btn" onclick="copyToClipboard('${escapeHtml(results.cta)}')">Copy</button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+            showStatus('Generated successfully!', 'success');
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        function copyToClipboard(text) {
+            text = text.replace(/\\"/g, '"');
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+        async function makeRequest(endpoint, data) {
+            try {
+                showStatus('Generating...', 'loading');
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                showStatus(`Error: ${error.message}. Make sure Flask server is running on http://localhost:5000`, 'error');
+                return null;
+            }
+        }
+
+        async function generateAll() {
+            const data = validateForm();
+            if (!data) return;
+
+            const result = await makeRequest('/generate-all', data);
+            if (result) {
+                displayResults(result);
+            }
+        }
+
+        async function generateHook() {
+            const data = validateForm();
+            if (!data) return;
+
+            const result = await makeRequest('/generate-hook', data);
+            if (result) {
+                displayResults({ hook: result.hook });
+            }
+        }
+
+        async function generateScript() {
+            const data = validateForm();
+            if (!data) return;
+
+            const result = await makeRequest('/generate-script', data);
+            if (result) {
+                displayResults({ script: result.script });
+            }
+        }
+
+        async function generateScenes() {
+            const data = validateForm();
+            if (!data) return;
+
+            const result = await makeRequest('/generate-scenes', data);
+            if (result) {
+                displayResults({ scenes: result.scenes });
+            }
+        }
+
+        async function generateCTA() {
+            const data = validateForm();
+            if (!data) return;
+
+            const result = await makeRequest('/generate-cta', data);
+            if (result) {
+                displayResults({ cta: result.cta });
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('productName').value = '';
+            document.getElementById('productDescription').value = '';
+            document.getElementById('targetAudience').value = '';
+            document.getElementById('campaignGoal').value = '';
+            document.getElementById('duration').value = '30';
+            document.getElementById('resultsContainer').innerHTML = '<div class="placeholder">Generate content to see results here</div>';
+            document.getElementById('status').className = 'status';
+        }
+
+        // Handle platform selection
+        document.getElementById('platform').addEventListener('change', (e) => {
+            document.getElementById('duration').value = e.target.value;
+        });
+    </script>
+</body>
+
+</html>
